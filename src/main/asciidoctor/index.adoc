@@ -1,0 +1,39 @@
+CustomerControllerTest makes a call to a very simple service and produces three documentation snippets.
+
+GET CUSTOMER
+
+One showing how to make a request using cURL:
+
+{snippets}/api/customer-get/curl-request.adoc
+
+One showing the HTTP request:
+
+{snippets}/api/customer-get/http-request.adoc
+
+And one showing the HTTP response:
+
+{snippets}/api/customer-get/http-response.adoc
+
+Response Body: {snippets}/api/customer-get/response-body.adoc
+
+Response Fields: {snippets}/api/customer-get/response-fields.adoc
+
+NEW CUSTOMER
+
+One showing how to make a request using cURL:
+
+{snippets}/api/customer-new/curl-request.adoc
+
+One showing the HTTP request:
+
+{snippets}/api/customer-new/http-request.adoc
+
+And one showing the HTTP response:
+
+{snippets}/api/customer-new/http-response.adoc
+
+Response Body: {snippets}/api/customer-new/response-body.adoc
+
+Request Fields {snippets}/api/customer-new/request-fields.adoc
+
+Response Fields: include::{snippets}/api/customer-get/response-fields.adoc

@@ -1,6 +1,6 @@
 package com.asia.tokyo.service;
 
-import com.asia.tokyo.domain.Customer;
+import com.asia.tokyo.controller.model.CustomerDto;
 
 import java.util.List;
 import java.util.Set;
@@ -8,15 +8,15 @@ import java.util.UUID;
 
 public interface CustomerService {
 
-    Customer addCustomer(Customer customer);
+    CustomerDto addCustomer(CustomerDto customerDto);
 
-    Customer findCustomerById(UUID uuid);
+    CustomerDto findCustomerById(UUID uuid);
 
-    Customer updateCustomer(Customer customer);
+    CustomerDto updateCustomer(CustomerDto customerDto);
 
     void deleteCustomer(UUID uuid);
 
-    List<Customer> findAllByCustomerNameLike(String customerName);
+    List<CustomerDto> findAllByCustomerNameLike(String customerName);
 
-    Set<Customer> findAll();
+    Set<CustomerDto> findAll();
 }

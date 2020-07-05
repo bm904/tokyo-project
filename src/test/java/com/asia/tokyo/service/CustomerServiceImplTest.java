@@ -1,7 +1,9 @@
 package com.asia.tokyo.service;
 
-import com.asia.tokyo.exception.CustomerException;
+import com.asia.tokyo.controller.mapper.CustomerMapper;
+import com.asia.tokyo.controller.model.CustomerDto;
 import com.asia.tokyo.domain.Customer;
+import com.asia.tokyo.exception.CustomerException;
 import com.asia.tokyo.repository.CustomerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,10 +12,9 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -26,18 +27,24 @@ class CustomerServiceImplTest {
     @Mock
     public CustomerRepository customerRepository;
 
+    @Mock
+    public CustomerMapper customerMapper;
+
     @Test
-    @DisplayName("Registering a new customer is valid")
+    @DisplayName("Adding a new customer is valid")
     void adding_new_customer_is_valid() {
         // GIVEN
+        CustomerDto customerDto = CustomerDto.builder().customerName("James Bond").tableNumber("10").build();
         Customer customer = Customer.builder().customerName("James Bond").tableNumber("10").build();
+        when(customerMapper.customerDtoToCustomer(any(CustomerDto.class))).thenReturn(customer);
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+        when(customerMapper.customerToCustomerDto(any(Customer.class))).thenReturn(customerDto);
 
         // WHEN
-        Customer result = customerService.addCustomer(customer);
+        CustomerDto result = customerService.addCustomer(customerDto);
 
         // THEN
-        assertEquals(customer, result);
+        assertEquals(customerDto, result);
     }
 
     @Test
@@ -69,14 +76,17 @@ class CustomerServiceImplTest {
     @DisplayName("Finding existing UUID customer is valid")
     void finding_existing_uuid_customer_is_valid() {
         // GIVEN
-        Customer customer = Customer.builder().id(UUID.randomUUID()).customerName("James Bond").tableNumber("10").build();
+        UUID uuid = UUID.randomUUID();
+        CustomerDto customerDto = CustomerDto.builder().id(uuid).customerName("James Bond").tableNumber("10").build();
+        Customer customer = Customer.builder().id(uuid).customerName("James Bond").tableNumber("10").build();
         when(customerRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(customer));
+        when(customerMapper.customerToCustomerDto(any(Customer.class))).thenReturn(customerDto);
 
         // WHEN
-        Customer result = customerService.findCustomerById(customer.getId());
+        CustomerDto result = customerService.findCustomerById(uuid);
 
         // THEN
-        assertEquals(customer, result);
+        assertEquals(customerDto, result);
     }
 
     @Test
@@ -90,14 +100,19 @@ class CustomerServiceImplTest {
     @DisplayName("Updating existing customer is valid")
     void updating_existing_customer_is_valid() {
         // GIVEN
-        Customer customer = Customer.builder().id(UUID.randomUUID()).customerName("James Bond").tableNumber("10").build();
+        UUID uuid = UUID.randomUUID();
+        CustomerDto customerDto = CustomerDto.builder().id(uuid).customerName("James Bond").tableNumber("10").build();
+        Customer customer = Customer.builder().id(uuid).customerName("James Bond").tableNumber("10").build();
+
+        when(customerMapper.customerDtoToCustomer(any(CustomerDto.class))).thenReturn(customer);
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+        when(customerMapper.customerToCustomerDto(any(Customer.class))).thenReturn(customerDto);
 
         // WHEN
-        Customer result = customerService.updateCustomer(customer);
+        CustomerDto result = customerService.updateCustomer(customerDto);
 
         // THEN
-        assertEquals(customer, result);
+        assertEquals(customerDto, result);
     }
 
     @Test
@@ -134,20 +149,23 @@ class CustomerServiceImplTest {
     void finding_customers_by_name_like_is_giving_2_customer_records() {
         // GIVEN
         String customerNamePattern = "James";
-        Customer customer1 = Customer.builder().id(UUID.randomUUID()).customerName("James Bond").tableNumber("10").build();
-        Customer customer2 = Customer.builder().id(UUID.randomUUID()).customerName("Marc Lee").tableNumber("2").build();
-        Customer customer3 = Customer.builder().id(UUID.randomUUID()).customerName("Anna Smith").tableNumber("5").build();
-        Customer customer4 = Customer.builder().id(UUID.randomUUID()).customerName("James-Lee Dog").tableNumber("8").build();
-        List<Customer> customers = Arrays.asList(customer1, customer2, customer3, customer4);
-        List<Customer> filteredCustomer = customers.stream().filter(c -> c.getCustomerName().contains(customerNamePattern)).collect(Collectors.toList());
+        UUID uuid1 = UUID.randomUUID();
+        UUID uuid2 = UUID.randomUUID();
+        Customer customer1 = Customer.builder().id(uuid1).customerName("James Bond").tableNumber("10").build();
+        Customer customer2 = Customer.builder().id(uuid2).customerName("James-Lee Dog").tableNumber("8").build();
+        List<Customer> filteredCustomer =  Arrays.asList(customer1, customer2);
+
+        CustomerDto customerDto1 = CustomerDto.builder().id(uuid1).customerName("James Bond").tableNumber("10").build();
+        CustomerDto customerDto2 = CustomerDto.builder().id(uuid2).customerName("James-Lee Dog").tableNumber("8").build();
+        List<CustomerDto> filteredCustomerDtos =  Arrays.asList(customerDto1, customerDto2);
 
         when(customerRepository.findAllByCustomerNameLike(any(String.class))).thenReturn(filteredCustomer);
+        when(customerMapper.customersToCustomerDtosList(any(List.class))).thenReturn(filteredCustomerDtos);
 
         // WHEN
-        List<Customer> result = customerService.findAllByCustomerNameLike(customerNamePattern);
+        List<CustomerDto> result = customerService.findAllByCustomerNameLike(customerNamePattern);
 
         // THEN
-        assertEquals(filteredCustomer, result);
         assertEquals(2, result.size());
     }
 
@@ -156,17 +174,19 @@ class CustomerServiceImplTest {
     void finding_customers_by_name_like_is_giving_0_customer_records() {
         // GIVEN
         String customerNamePattern = "Lucy";
-        Customer customer1 = Customer.builder().id(UUID.randomUUID()).customerName("James Bond").tableNumber("10").build();
-        Customer customer2 = Customer.builder().id(UUID.randomUUID()).customerName("Marc Lee").tableNumber("2").build();
-        Customer customer3 = Customer.builder().id(UUID.randomUUID()).customerName("Anna Smith").tableNumber("5").build();
-        Customer customer4 = Customer.builder().id(UUID.randomUUID()).customerName("James-Lee Dog").tableNumber("8").build();
-        List<Customer> customers = Arrays.asList(customer1, customer2, customer3, customer4);
-        List<Customer> filteredCustomer = customers.stream().filter(c -> c.getCustomerName().contains(customerNamePattern)).collect(Collectors.toList());
+        UUID uuid1 = UUID.randomUUID();
+        UUID uuid2 = UUID.randomUUID();
+        Customer customer1 = Customer.builder().id(uuid1).customerName("James Bond").tableNumber("10").build();
+        Customer customer2 = Customer.builder().id(uuid2).customerName("James-Lee Dog").tableNumber("8").build();
+        List<Customer> filteredCustomer =  Arrays.asList(customer1, customer2);
+
+        List<CustomerDto> filteredCustomerDtos =  Arrays.asList();
 
         when(customerRepository.findAllByCustomerNameLike(any(String.class))).thenReturn(filteredCustomer);
+        when(customerMapper.customersToCustomerDtosList(any(List.class))).thenReturn(filteredCustomerDtos);
 
         // WHEN
-        List<Customer> result = customerService.findAllByCustomerNameLike(customerNamePattern);
+        List<CustomerDto> result = customerService.findAllByCustomerNameLike(customerNamePattern);
 
         // THEN
         assertNotNull(result);
@@ -177,21 +197,24 @@ class CustomerServiceImplTest {
     @DisplayName("Finding all customers is giving 4 records")
     void finding_all_customers_is_giving_4_records() {
         // GIVEN
-        String customerNamePattern = "James";
-        Customer customer1 = Customer.builder().id(UUID.randomUUID()).customerName("James Bond").tableNumber("10").build();
-        Customer customer2 = Customer.builder().id(UUID.randomUUID()).customerName("Marc Lee").tableNumber("2").build();
-        Customer customer3 = Customer.builder().id(UUID.randomUUID()).customerName("Anna Smith").tableNumber("5").build();
-        Customer customer4 = Customer.builder().id(UUID.randomUUID()).customerName("James-Lee Dog").tableNumber("8").build();
-        List<Customer> customers = Arrays.asList(customer1, customer2, customer3, customer4);
+        UUID uuid1 = UUID.randomUUID();
+        UUID uuid2 = UUID.randomUUID();
+        Customer customer1 = Customer.builder().id(uuid1).customerName("James Bond").tableNumber("10").build();
+        Customer customer2 = Customer.builder().id(uuid2).customerName("James-Lee Dog").tableNumber("8").build();
+        List<Customer> customers =  Arrays.asList(customer1, customer2);
+
+        CustomerDto customerDto1 = CustomerDto.builder().id(uuid1).customerName("James Bond").tableNumber("10").build();
+        CustomerDto customerDto2 = CustomerDto.builder().id(uuid2).customerName("James-Lee Dog").tableNumber("8").build();
+        Set<CustomerDto> customersDto =  new HashSet<>(Arrays.asList(customerDto1, customerDto2));
 
         when(customerRepository.findAll()).thenReturn(customers);
+        when(customerMapper.customersToCustomerDtosSet(any(Set.class))).thenReturn(customersDto);
 
         // WHEN
-        Set<Customer> result = customerService.findAll();
+        Set<CustomerDto> result = customerService.findAll();
 
         // THEN
-        assertEquals(new HashSet<>(customers), result);
-        assertEquals(4, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
@@ -201,10 +224,9 @@ class CustomerServiceImplTest {
         when(customerRepository.findAll()).thenReturn(Arrays.asList());
 
         // WHEN
-        Set<Customer> result = customerService.findAll();
+        Set<CustomerDto> result = customerService.findAll();
 
         // THEN
-        assertEquals(new HashSet<>(Arrays.asList()), result);
         assertEquals(0, result.size());
     }
 
