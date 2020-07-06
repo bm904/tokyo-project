@@ -18,13 +18,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <jaxb.version>2.3.0</jaxb.version>
-        <jax.validation.version>2.0.1.Final</jax.validation.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <org.mapstruct.version>1.3.0.Final</org.mapstruct.version>
         <jacoco.version>0.8.5</jacoco.version>
         <hibernate.validator>6.1.5.Final</hibernate.validator>
+        <springfox-swagger.version>2.7.0</springfox-swagger.version>
     </properties>
 
     <dependencies>
@@ -89,6 +88,16 @@
             <groupId>org.springframework.restdocs</groupId>
             <artifactId>spring-restdocs-mockmvc</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-swagger.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

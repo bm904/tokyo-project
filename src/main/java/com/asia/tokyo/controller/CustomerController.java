@@ -2,6 +2,7 @@ package com.asia.tokyo.controller;
 
 import com.asia.tokyo.controller.model.CustomerDto;
 import com.asia.tokyo.service.CustomerService;
+import io.swagger.annotations.Api;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,9 +15,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Api("Customer controller")
 @Validated
 @RestController
-//@RequiredArgsConstructor
 @RequestMapping(value = "/api/customer", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CustomerController {
 
